@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0a1128;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        header {
+            background-image: url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/machine-learning.jpg-6YGCRLCLSX2h2rUIYQ0meBSHb1tYFt.jpeg');
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 20, 50, 0.7);
+        }
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #00e5ff;
+        }
+        .form-section {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: rgba(10, 30, 66, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00e5ff;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 2px solid #00e5ff;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background-color: #00e5ff;
+            color: #0a1128;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #00b8cc;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Heart Disease Prediction</h1>
+        </div>
+    </header>
+    <main>
+        <section class="form-section">
+            <h2>Enter Your Details</h2>
+            <form action="/" method="post">
+                <div class="form-group">
+                    <label>Age:</label>
+                    <input type="number" name="age" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <select name="gender">
+                        <option value="1">Female</option>
+                        <option value="2">Male</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Height (cm):</label>
+                    <input type="number" name="height" required>
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg):</label>
+                    <input type="number" step="0.1" name="weight" required>
+                </div>
+                <div class="form-group">
+                    <label>Systolic Blood Pressure (ap_hi):</label>
+                    <input type="number" name="ap_hi" required>
+                </div>
+                <div class="form-group">
+                    <label>Diastolic Blood Pressure (ap_lo):</label>
+                    <input type="number" name="ap_lo" required>
+                </div>
+                <div class="form-group">
+                    <label>Cholesterol Level:</label>
+                    <select name="cholesterol">
+                        <option value="1">Normal</option>
+                        <option value="2">Above Normal</option>
+                        <option value="3">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Glucose Level:</label>
+                    <select name="gluc">
+                        <option value="1">Normal</option>
+                        <option value="2">Above Normal</option>
+                        <option value="3">High</option>
+                    </select>
+                </div>
+                <button type="submit">Predict</button>
+            </form>
+            {% if prediction %}
+                <h3>Prediction: {{ prediction }}</h3>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

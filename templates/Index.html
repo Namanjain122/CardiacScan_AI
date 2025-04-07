@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00a8ff;
+            --primary-dark: #0097e6;
+            --secondary: #ff4757;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border-radius: 12px;
+            --glow-color: rgba(0, 168, 255, 0.6);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            background: #000;
+            overflow-x: hidden;
+        }
+        
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+            filter: blur(2px);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 10, 30, 0.85) 0%, rgba(0, 20, 60, 0.95) 100%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+            text-shadow: 0 0 15px var(--glow-color);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                flex-direction: row;
+            }
+        }
+        
+        .form-container {
+            flex: 1;
+            background: rgba(10, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px var(--glow-color);
+            border: 1px solid rgba(0, 168, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+            animation: pulse-glow 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0% { transform: scale(0.8); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+            100% { transform: scale(0.8); opacity: 0.1; }
+        }
+        
+        .heart-visual {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .heart-hologram {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            filter: drop-shadow(0 0 15px var(--glow-color));
+            animation: rotate 20s linear infinite;
+            transform-style: preserve-3d;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        
+        .data-points {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .data-point {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+        
+        .data-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            transform-origin: left center;
+        }
+        
+        form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (min-width: 768px) {
+            form {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem 2rem;
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--light);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        input, select {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            background: rgba(10, 20, 40, 0.6);
+            color: var(--light);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.2);
+        }
+        
+        .btn-container {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+        }
+        
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 168, 255, 0.5);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        .prediction-result {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(10, 20, 40, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid rgba(0, 168, 255, 0.2);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .prediction-result::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .prediction-result h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+        
+        .prediction-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--glow-color);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .heartbeat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .heartbeat-line {
+            width: 100%;
+            height: 40px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,30 L300,30 L320,10 L340,50 L360,10 L380,50 L400,10 L420,50 L440,30 L1200,30' stroke='%2300a8ff' stroke-width='2' fill='none' /%3E%3C/svg%3E") repeat-x;
+            background-size: 1200px 60px;
+            animation: heartbeat-animation 3s linear infinite;
+        }
+        
+        @keyframes heartbeat-animation {
+            0% { background-position: 0 0; }
+            100% { background-position: -1200px 0; }
+        }
+        
+        .tech-circles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .tech-circle {
+            position: absolute;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 50%;
+        }
+        
+        .tech-circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        .tech-circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: -100px;
+            animation: rotate-slow 15s linear infinite reverse;
+        }
+        
+        @keyframes rotate-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Generate 20 random data points and lines for the visualization */
+        .data-points::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle, rgba(0, 168, 255, 0.1) 0%, transparent 70%);
+            animation: pulse-glow 4s ease-in-out infinite alternate;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 991px) {
+            .heart-visual {
+                order: -1;
+                margin-bottom: 2rem;
+            }
+            
+            .heart-hologram {
+                max-width: 300px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .heart-hologram {
+                max-width: 250px;
+            }
+        }
+       
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                font-weight: bold;
+                text-decoration: none;
+                color: white;
+                background-color: #007bff;
+                border-radius: 8px;
+                transition: 0.3s ease-in-out;
+            }
+    
+            .btn:hover {
+                background-color: #0056b3;
+                transform: scale(1.05);
+            }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('about') }}" class="btn">About Us</a>
+    <div class="background-wrapper">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/machine-learning.jpg-tS9sbZy13jvWjTZTDT4JAeKy4qHMhE.jpeg" alt="AI Background" class="background-image">
+    </div>
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#00a8ff"/>
+                </svg>
+            </div>
+            <h1>CARDIAC<span style="color: #00a8ff;">SCAN</span> AI</h1>
+            <p class="subtitle">Advanced artificial intelligence system for heart disease prediction and early detection</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="form-container">
+                <div class="tech-circles">
+                    <div class="tech-circle tech-circle-1"></div>
+                    <div class="tech-circle tech-circle-2"></div>
+                </div>
+                
+                <form action="/" method="post">
+                    <div class="form-group">
+                        <label for="age">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Age
+                        </label>
+                        <input type="number" id="age" name="age" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            </svg>
+                            Gender
+                        </label>
+                        <select id="gender" name="gender">
+                            <option value="1">Female</option>
+                            <option value="2">Male</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="height">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="3" x2="12" y2="21"></line>
+                                <polyline points="8 8 12 4 16 8"></polyline>
+                                <polyline points="8 16 12 20 16 16"></polyline>
+                            </svg>
+                            Height (cm)
+                        </label>
+                        <input type="number" id="height" name="height" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                            Weight (kg)
+                        </label>
+                        <input type="number" step="0.1" id="weight" name="weight" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ap_hi">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                            </svg>
+                            Systolic BP
+                        </label>
+                        <input type="number" id="ap_hi" name="ap_hi" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ap_lo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12h4l3-9 6 18 3-9h4"></path>
+                            </svg>
+                            Diastolic BP
+                        </label>
+                        <input type="number" id="ap_lo" name="ap_lo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cholesterol">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 20V10"></path>
+                                <path d="M12 20V4"></path>
+                                <path d="M6 20v-6"></path>
+                            </svg>
+                            Cholesterol
+                        </label>
+                        <select id="cholesterol" name="cholesterol">
+                            <option value="1">Normal</option>
+                            <option value="2">Above Normal</option>
+                            <option value="3">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gluc">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v6.5l3 1.5"></path>
+                                <path d="M12 2v6.5l-3 1.5"></path>
+                                <path d="M12 22v-6.5"></path>
+                                <path d="M12 22v-6.5l3-1.5"></path>
+                                <path d="M12 22v-6.5l-3-1.5"></path>
+                                <path d="M20 12h-4.5"></path>
+                                <path d="M20 12h-4.5l-1.5 3"></path>
+                                <path d="M20 12h-4.5l-1.5-3"></path>
+                                <path d="M4 12h4.5"></path>
+                                <path d="M4 12h4.5l1.5 3"></path>
+                                <path d="M4 12h4.5l1.5-3"></path>
+                            </svg>
+                            Glucose
+                        </label>
+                        <select id="gluc" name="gluc">
+                            <option value="1">Normal</option>
+                            <option value="2">Above Normal</option>
+                            <option value="3">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="smoke">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 16H5a2 2 0 0 0-2 2"></path>
+                                <path d="M14 16V9a2 2 0 0 0-2-2H8"></path>
+                                <path d="M12 16V7"></path>
+                            </svg>
+                            Smoking
+                        </label>
+                        <select id="smoke" name="smoke">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="alco">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 21h8"></path>
+                                <path d="M12 21v-2"></path>
+                                <path d="M17 13l-5-5-5 5"></path>
+                                <path d="M8 13h8"></path>
+                            </svg>
+                            Alcohol
+                        </label>
+                        <select id="alco" name="alco">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <path d="M4 15l4-4 4 4 8-8"></path>
+                                <path d="M4 22l4-4 4 4 8-8"></path>
+                            </svg>
+                            Physical Activity
+                        </label>
+                        <select id="active" name="active">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="country">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            Country
+                        </label>
+                        <select id="country" name="country">
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="India">India</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="occupation">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            Occupation
+                        </label>
+                        <select id="occupation" name="occupation">
+                            <option value="Architect">Architect</option>
+                            <option value="Accountant">Accountant</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Lawyer">Lawyer</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Engineer">Engineer</option>
+                            <option value="Doctor">Doctor</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    
+                    <div class="btn-container">
+                        <button type="submit">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                                <line x1="16" y1="8" x2="2" y2="22"></line>
+                                <line x1="17.5" y1="15" x2="9" y2="15"></line>
+                            </svg>
+                            ANALYZE CARDIAC DATA
+                        </button>
+                    </div>
+                </form>
+                
+                {% if prediction %}
+                <div class="prediction-result">
+                    <h3>AI PREDICTION RESULT</h3>
+                    <p class="prediction-value pulse">{{ prediction }}</p>
+                    <div class="heartbeat">
+                        <div class="heartbeat-line"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="heart-visual">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1712137752403-SCPBdjL61hyLzCLsZU2dD71i9oprzD.png" alt="Digital heart hologram" class="heart-hologram">
+                <div class="data-points">
+                    <!-- Data points and lines are generated via CSS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Create animated data points and lines
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataPointsContainer = document.querySelector('.data-points');
+            
+            // Create 20 random data points
+            for (let i = 0; i < 20; i++) {
+                const dataPoint = document.createElement('div');
+                dataPoint.classList.add('data-point');
+                
+                // Random position
+                const top = Math.random() * 100;
+                const left = Math.random() * 100;
+                dataPoint.style.top = `${top}%`;
+                dataPoint.style.left = `${left}%`;
+                
+                // Random animation
+                const animationDuration = 3 + Math.random() * 5;
+                dataPoint.style.animation = `pulse ${animationDuration}s ease-in-out infinite`;
+                
+                dataPointsContainer.appendChild(dataPoint);
+                
+                // Create data line connecting to center
+                if (Math.random() > 0.5) {
+                    const dataLine = document.createElement('div');
+                    dataLine.classList.add('data-line');
+                    
+                    // Position line from data point to center
+                    dataLine.style.top = `${top}%`;
+                    dataLine.style.left = `${left}%`;
+                    
+                    // Calculate angle to center
+                    const angle = Math.atan2(50 - top, 50 - left);
+                    const length = Math.sqrt(Math.pow(50 - top, 2) + Math.pow(50 - left, 2));
+                    
+                    dataLine.style.width = `${length}%`;
+                    dataLine.style.transform = `rotate(${angle}rad)`;
+                    
+                    // Random opacity and animation
+                    dataLine.style.opacity = 0.1 + Math.random() * 0.4;
+                    const lineAnimationDuration = 2 + Math.random() * 3;
+                    dataLine.style.animation = `pulse ${lineAnimationDuration}s ease-in-out infinite`;
+                    
+                    dataPointsContainer.appendChild(dataLine);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
