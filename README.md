@@ -1,4 +1,4 @@
-# ❤️ Heart Disease Prediction Web Application
+# ❤️ CardiacScan AI Web Application
 
 This project is a **Flask-based web application** that predicts the risk of heart disease based on user input using Machine Learning models. It also stores the submitted data into a MySQL database for record keeping or future analysis.
 
